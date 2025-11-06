@@ -1,0 +1,182 @@
+basePath: /v1
+definitions:
+  subscriptions.CreateSubscriptionRequest:
+    properties:
+      end_date:
+        type: string
+      price:
+        type: integer
+      service_name:
+        type: string
+      start_date:
+        type: string
+      user_id:
+        type: string
+    type: object
+  subscriptions.Response:
+    properties:
+      data: {}
+      error:
+        type: string
+      status:
+        type: string
+    type: object
+  subscriptions.UpdateSubscriptionRequest:
+    properties:
+      end_date:
+        type: string
+      price:
+        type: integer
+      service_name:
+        type: string
+      start_date:
+        type: string
+      user_id:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact:
+    email: example@mail.com
+    name: API Support
+    url: https://github.com/n-korel
+  description: REST API для управления подписками пользователей
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+  termsOfService: http://swagger.io/terms/
+  title: User Subscriptions API
+  version: "1.0"
+paths:
+  /subscriptions:
+    get:
+      description: Retrieve all subscriptions
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/subscriptions.Response'
+      summary: Get all subscriptions
+      tags:
+      - subscriptions
+    post:
+      consumes:
+      - application/json
+      description: Create a new subscription record
+      parameters:
+      - description: Subscription data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/subscriptions.CreateSubscriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/subscriptions.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/subscriptions.Response'
+      summary: Create a new subscription
+      tags:
+      - subscriptions
+  /subscriptions/{id}:
+    delete:
+      description: Delete an existing subscription
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/subscriptions.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/subscriptions.Response'
+      summary: Delete a subscription
+      tags:
+      - subscriptions
+    patch:
+      consumes:
+      - application/json
+      description: Update an existing subscription
+      parameters:
+      - description: Subscription ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Subscription data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/subscriptions.UpdateSubscriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/subscriptions.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/subscriptions.Response'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/subscriptions.Response'
+      summary: Update a subscription
+      tags:
+      - subscriptions
+  /subscriptions/cost:
+    get:
+      description: Calculate total cost of subscriptions for a given period with optional
+        filters
+      parameters:
+      - description: Start date (MM-YYYY format)
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: End date (MM-YYYY format)
+        in: query
+        name: end_date
+        type: string
+      - description: User ID (UUID)
+        in: query
+        name: user_id
+        type: string
+      - description: Service name
+        in: query
+        name: service_name
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/subscriptions.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/subscriptions.Response'
+      summary: Get subscriptions cost by period
+      tags:
+      - subscriptions
+swagger: "2.0"

@@ -1,0 +1,15 @@
+.env
+.env.local
+.env.production
+
+**/node_modules
+**/.vscode
+*.exe
+bin/
+
+*.log
+
+.vscode/
+.idea/
+
+/postgres-data

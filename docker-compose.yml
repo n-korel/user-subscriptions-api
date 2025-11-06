@@ -1,0 +1,51 @@
+version: "3.8"
+
+services:
+  api:
+    container_name: subscriptions_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - DSN=postgres://postgres:my_pass@postgres:5432/user-subscriptions-api?sslmode=disable
+      - SERVER_PORT=8080
+      - API_URL=localhost:8080
+      - LOG_LEVEL=info
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - backend
+    restart: unless-stopped
+    volumes:
+      - ./.env:/root/.env
+
+  postgres:
+    container_name: postgres_go_user-subscriptions-api
+    image: postgres:16.4
+    environment:
+      POSTGRES_DB: user-subscriptions-api
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: my_pass
+      PGDATA: /var/lib/postgresql/data
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - backend
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres-data:
+
+networks:
+  backend:
+    driver: bridge
