@@ -20,17 +20,17 @@ type SubscriptionRepository interface {
 
 type repository struct {
 	db  *pgxpool.Pool
-	log *logger.Logger
+	log logger.LoggerInterface
 }
 
-func NewRepository(db *pgxpool.Pool, log *logger.Logger) SubscriptionRepository {
+func NewRepository(db *pgxpool.Pool, log logger.LoggerInterface) SubscriptionRepository {
 	return &repository{db: db, log: log}
 }
 
 func (r *repository) GetAll(ctx context.Context) ([]Subscription, error) {
 	rows, err := r.db.Query(ctx, "SELECT id, service_name, price, user_id, start_date, end_date, created_at, updated_at FROM subscriptions ORDER BY created_at DESC")
 	if err != nil {
-		r.log.Error("Failed to query subscriptions", map[string]interface{}{"error": err})
+		r.log.Error("Failed to query subscriptions", map[string]any{"error": err})
 		return nil, fmt.Errorf("failed to query subscriptions: %w", err)
 	}
 	defer rows.Close()
@@ -39,13 +39,13 @@ func (r *repository) GetAll(ctx context.Context) ([]Subscription, error) {
 	for rows.Next() {
 		var sub Subscription
 		if err := rows.Scan(&sub.ID, &sub.ServiceName, &sub.Price, &sub.UserID, &sub.StartDate, &sub.EndDate, &sub.CreatedAt, &sub.UpdatedAt); err != nil {
-			r.log.Error("Failed to scan subscription", map[string]interface{}{"error": err})
+			r.log.Error("Failed to scan subscription", map[string]any{"error": err})
 			return nil, fmt.Errorf("failed to scan subscription: %w", err)
 		}
 		subscriptions = append(subscriptions, sub)
 	}
 
-	r.log.Info("Retrieved all subscriptions", map[string]interface{}{"count": len(subscriptions)})
+	r.log.Info("Retrieved all subscriptions", map[string]any{"count": len(subscriptions)})
 	return subscriptions, nil
 }
 
@@ -54,7 +54,7 @@ func (r *repository) GetByID(ctx context.Context, id int) (*Subscription, error)
 	err := r.db.QueryRow(ctx, "SELECT id, service_name, price, user_id, start_date, end_date, created_at, updated_at FROM subscriptions WHERE id = $1", id).
 		Scan(&sub.ID, &sub.ServiceName, &sub.Price, &sub.UserID, &sub.StartDate, &sub.EndDate, &sub.CreatedAt, &sub.UpdatedAt)
 	if err != nil {
-		r.log.Warn("Subscription not found", map[string]interface{}{"id": id})
+		r.log.Warn("Subscription not found", map[string]any{"id": id})
 		return nil, fmt.Errorf("subscription not found: %w", err)
 	}
 	return &sub, nil
@@ -68,11 +68,11 @@ func (r *repository) Create(ctx context.Context, req CreateSubscriptionRequest) 
 	).Scan(&sub.ID, &sub.ServiceName, &sub.Price, &sub.UserID, &sub.StartDate, &sub.EndDate, &sub.CreatedAt, &sub.UpdatedAt)
 
 	if err != nil {
-		r.log.Error("Failed to create subscription", map[string]interface{}{"error": err, "service": req.ServiceName})
+		r.log.Error("Failed to create subscription", map[string]any{"error": err, "service": req.ServiceName})
 		return nil, fmt.Errorf("failed to create subscription: %w", err)
 	}
 
-	r.log.Info("Subscription created", map[string]interface{}{"id": sub.ID, "service": req.ServiceName, "user_id": req.UserID})
+	r.log.Info("Subscription created", map[string]any{"id": sub.ID, "service": req.ServiceName, "user_id": req.UserID})
 	return &sub, nil
 }
 
@@ -84,32 +84,32 @@ func (r *repository) Update(ctx context.Context, id int, req UpdateSubscriptionR
 	).Scan(&sub.ID, &sub.ServiceName, &sub.Price, &sub.UserID, &sub.StartDate, &sub.EndDate, &sub.CreatedAt, &sub.UpdatedAt)
 
 	if err != nil {
-		r.log.Error("Failed to update subscription", map[string]interface{}{"error": err, "id": id})
+		r.log.Error("Failed to update subscription", map[string]any{"error": err, "id": id})
 		return nil, fmt.Errorf("failed to update subscription: %w", err)
 	}
 
-	r.log.Info("Subscription updated", map[string]interface{}{"id": id})
+	r.log.Info("Subscription updated", map[string]any{"id": id})
 	return &sub, nil
 }
 
 func (r *repository) Delete(ctx context.Context, id int) error {
 	result, err := r.db.Exec(ctx, "DELETE FROM subscriptions WHERE id=$1", id)
 	if err != nil {
-		r.log.Error("Failed to delete subscription", map[string]interface{}{"error": err, "id": id})
+		r.log.Error("Failed to delete subscription", map[string]any{"error": err, "id": id})
 		return fmt.Errorf("failed to delete subscription: %w", err)
 	}
 	if result.RowsAffected() == 0 {
-		r.log.Warn("Subscription not found for deletion", map[string]interface{}{"id": id})
+		r.log.Warn("Subscription not found for deletion", map[string]any{"id": id})
 		return fmt.Errorf("subscription not found")
 	}
 
-	r.log.Info("Subscription deleted", map[string]interface{}{"id": id})
+	r.log.Info("Subscription deleted", map[string]any{"id": id})
 	return nil
 }
 
 func (r *repository) GetCostByPeriod(ctx context.Context, startDate, endDate string, userID *uuid.UUID, serviceName *string) (int, int, error) {
 	query := "SELECT COALESCE(SUM(price), 0) as total_cost, COUNT(*) as count FROM subscriptions WHERE 1=1"
-	args := []interface{}{}
+	args := []any{}
 	argCount := 1
 
 	if startDate != "" {
@@ -139,10 +139,10 @@ func (r *repository) GetCostByPeriod(ctx context.Context, startDate, endDate str
 	var totalCost, count int
 	err := r.db.QueryRow(ctx, query, args...).Scan(&totalCost, &count)
 	if err != nil {
-		r.log.Error("Failed to calculate cost", map[string]interface{}{"error": err})
+		r.log.Error("Failed to calculate cost", map[string]any{"error": err})
 		return 0, 0, fmt.Errorf("failed to calculate cost: %w", err)
 	}
 
-	r.log.Info("Cost calculated", map[string]interface{}{"total": totalCost, "count": count})
+	r.log.Info("Cost calculated", map[string]any{"total": totalCost, "count": count})
 	return totalCost, count, nil
 }

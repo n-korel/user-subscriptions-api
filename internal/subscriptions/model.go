@@ -40,6 +40,6 @@ type CostResponse struct {
 
 type Response struct {
 	Status string      `json:"status"`
-	Data   interface{} `json:"data,omitempty"`
+	Data   any `json:"data,omitempty"`
 	Error  string      `json:"error,omitempty"`
 }

@@ -13,10 +13,10 @@ import (
 
 type Handler struct {
 	service SubscriptionService
-	log     *logger.Logger
+	log     logger.LoggerInterface
 }
 
-func NewHandler(service SubscriptionService, log *logger.Logger) *Handler {
+func NewHandler(service SubscriptionService, log logger.LoggerInterface) *Handler {
 	return &Handler{service: service, log: log}
 }
 
@@ -47,7 +47,7 @@ func (h *Handler) GetSubscriptions(w http.ResponseWriter, r *http.Request) {
 
 	subs, err := h.service.GetAllSubscriptions(r.Context())
 	if err != nil {
-		h.log.Error("Failed to fetch subscriptions", map[string]interface{}{"error": err})
+		h.log.Error("Failed to fetch subscriptions", map[string]any{"error": err})
 		h.writeJSON(w, http.StatusInternalServerError, Response{Status: "error", Error: "Failed to fetch subscriptions"})
 		return
 	}
@@ -71,26 +71,26 @@ func (h *Handler) CreateSubscription(w http.ResponseWriter, r *http.Request) {
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		h.log.Error("Invalid request body", map[string]interface{}{"error": err})
+		h.log.Error("Invalid request body", map[string]any{"error": err})
 		h.writeJSON(w, http.StatusBadRequest, Response{Status: "error", Error: "Invalid request body"})
 		return
 	}
 
 	var req CreateSubscriptionRequest
 	if err := json.Unmarshal(body, &req); err != nil {
-		h.log.Error("Invalid JSON", map[string]interface{}{"error": err})
+		h.log.Error("Invalid JSON", map[string]any{"error": err})
 		h.writeJSON(w, http.StatusBadRequest, Response{Status: "error", Error: "Invalid JSON"})
 		return
 	}
 
 	sub, err := h.service.CreateSubscription(r.Context(), req)
 	if err != nil {
-		h.log.Error("Failed to create subscription", map[string]interface{}{"error": err})
+		h.log.Error("Failed to create subscription", map[string]any{"error": err})
 		h.writeJSON(w, http.StatusBadRequest, Response{Status: "error", Error: err.Error()})
 		return
 	}
 
-	h.log.Info("Subscription created successfully", map[string]interface{}{"id": sub.ID})
+	h.log.Info("Subscription created successfully", map[string]any{"id": sub.ID})
 	h.writeJSON(w, http.StatusCreated, Response{Status: "success", Data: sub})
 }
 
@@ -110,35 +110,35 @@ func (h *Handler) CreateSubscription(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) UpdateSubscription(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		h.log.Error("Invalid subscription ID", map[string]interface{}{"error": err})
+		h.log.Error("Invalid subscription ID", map[string]any{"error": err})
 		h.writeJSON(w, http.StatusBadRequest, Response{Status: "error", Error: "Invalid subscription ID"})
 		return
 	}
 
-	h.log.Info("PATCH /subscriptions/{id}", map[string]interface{}{"id": id})
+	h.log.Info("PATCH /subscriptions/{id}", map[string]any{"id": id})
 
 	body, err := io.ReadAll(r.Body)
 	if err != nil {
-		h.log.Error("Invalid request body", map[string]interface{}{"error": err})
+		h.log.Error("Invalid request body", map[string]any{"error": err})
 		h.writeJSON(w, http.StatusBadRequest, Response{Status: "error", Error: "Invalid request body"})
 		return
 	}
 
 	var req UpdateSubscriptionRequest
 	if err := json.Unmarshal(body, &req); err != nil {
-		h.log.Error("Invalid JSON", map[string]interface{}{"error": err})
+		h.log.Error("Invalid JSON", map[string]any{"error": err})
 		h.writeJSON(w, http.StatusBadRequest, Response{Status: "error", Error: "Invalid JSON"})
 		return
 	}
 
 	sub, err := h.service.UpdateSubscription(r.Context(), id, req)
 	if err != nil {
-		h.log.Error("Failed to update subscription", map[string]interface{}{"error": err, "id": id})
+		h.log.Error("Failed to update subscription", map[string]any{"error": err, "id": id})
 		h.writeJSON(w, http.StatusNotFound, Response{Status: "error", Error: err.Error()})
 		return
 	}
 
-	h.log.Info("Subscription updated successfully", map[string]interface{}{"id": id})
+	h.log.Info("Subscription updated successfully", map[string]any{"id": id})
 	h.writeJSON(w, http.StatusOK, Response{Status: "success", Data: sub})
 }
 
@@ -155,21 +155,21 @@ func (h *Handler) UpdateSubscription(w http.ResponseWriter, r *http.Request) {
 func (h *Handler) DeleteSubscription(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(chi.URLParam(r, "id"))
 	if err != nil {
-		h.log.Error("Invalid subscription ID", map[string]interface{}{"error": err})
+		h.log.Error("Invalid subscription ID", map[string]any{"error": err})
 		h.writeJSON(w, http.StatusBadRequest, Response{Status: "error", Error: "Invalid subscription ID"})
 		return
 	}
 
-	h.log.Info("DELETE /subscriptions/{id}", map[string]interface{}{"id": id})
+	h.log.Info("DELETE /subscriptions/{id}", map[string]any{"id": id})
 
 	err = h.service.DeleteSubscription(r.Context(), id)
 	if err != nil {
-		h.log.Error("Failed to delete subscription", map[string]interface{}{"error": err, "id": id})
+		h.log.Error("Failed to delete subscription", map[string]any{"error": err, "id": id})
 		h.writeJSON(w, http.StatusNotFound, Response{Status: "error", Error: err.Error()})
 		return
 	}
 
-	h.log.Info("Subscription deleted successfully", map[string]interface{}{"id": id})
+	h.log.Info("Subscription deleted successfully", map[string]any{"id": id})
 	h.writeJSON(w, http.StatusOK, Response{Status: "success", Data: map[string]string{"message": "Subscription deleted"}})
 }
 
@@ -198,7 +198,7 @@ func (h *Handler) GetCostByPeriod(w http.ResponseWriter, r *http.Request) {
 	if userIDStr != "" {
 		uid, err := uuid.Parse(userIDStr)
 		if err != nil {
-			h.log.Error("Invalid user ID format", map[string]interface{}{"error": err, "user_id": userIDStr})
+			h.log.Error("Invalid user ID format", map[string]any{"error": err, "user_id": userIDStr})
 			h.writeJSON(w, http.StatusBadRequest, Response{Status: "error", Error: "Invalid user ID format"})
 			return
 		}
@@ -212,16 +212,16 @@ func (h *Handler) GetCostByPeriod(w http.ResponseWriter, r *http.Request) {
 
 	cost, err := h.service.GetCostByPeriod(r.Context(), startDate, endDate, userID, serviceNamePtr)
 	if err != nil {
-		h.log.Error("Failed to calculate cost", map[string]interface{}{"error": err})
+		h.log.Error("Failed to calculate cost", map[string]any{"error": err})
 		h.writeJSON(w, http.StatusBadRequest, Response{Status: "error", Error: err.Error()})
 		return
 	}
 
-	h.log.Info("Cost calculated successfully", map[string]interface{}{"total": cost.TotalCost, "count": cost.Count})
+	h.log.Info("Cost calculated successfully", map[string]any{"total": cost.TotalCost, "count": cost.Count})
 	h.writeJSON(w, http.StatusOK, Response{Status: "success", Data: cost})
 }
 
-func (h *Handler) writeJSON(w http.ResponseWriter, status int, data interface{}) {
+func (h *Handler) writeJSON(w http.ResponseWriter, status int, data any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)
 	json.NewEncoder(w).Encode(data)

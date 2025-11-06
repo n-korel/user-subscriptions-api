@@ -20,10 +20,10 @@ type SubscriptionService interface {
 
 type service struct {
 	repo SubscriptionRepository
-	log  *logger.Logger
+	log  logger.LoggerInterface
 }
 
-func NewService(repo SubscriptionRepository, log *logger.Logger) SubscriptionService {
+func NewService(repo SubscriptionRepository, log logger.LoggerInterface) SubscriptionService {
 	return &service{repo: repo, log: log}
 }
 
@@ -37,7 +37,7 @@ func (s *service) GetSubscriptionByID(ctx context.Context, id int) (*Subscriptio
 
 func (s *service) CreateSubscription(ctx context.Context, req CreateSubscriptionRequest) (*Subscription, error) {
 	if err := s.validateSubscriptionRequest(req); err != nil {
-		s.log.Warn("Validation failed", map[string]interface{}{"error": err.Error()})
+		s.log.Warn("Validation failed", map[string]any{"error": err.Error()})
 		return nil, err
 	}
 
@@ -52,7 +52,7 @@ func (s *service) UpdateSubscription(ctx context.Context, id int, req UpdateSubs
 		StartDate:   req.StartDate,
 		EndDate:     req.EndDate,
 	}); err != nil {
-		s.log.Warn("Validation failed", map[string]interface{}{"error": err.Error(), "id": id})
+		s.log.Warn("Validation failed", map[string]any{"error": err.Error(), "id": id})
 		return nil, err
 	}
 

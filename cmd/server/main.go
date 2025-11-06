@@ -60,12 +60,12 @@ func main() {
 
 	db, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {
-		log.Fatal("Failed to connect to database", map[string]interface{}{"error": err})
+		log.Fatal("Failed to connect to database", map[string]any{"error": err})
 	}
 	defer db.Close()
 
 	if err := db.Ping(context.Background()); err != nil {
-		log.Fatal("Failed to ping database", map[string]interface{}{"error": err})
+		log.Fatal("Failed to ping database", map[string]any{"error": err})
 	}
 
 	log.Info("Database has connected!", nil)
@@ -86,8 +86,8 @@ func main() {
 		r.Handle("/*", httpSwagger.Handler())
 	})
 
-	log.Info("Server starting", map[string]interface{}{"port": port})
+	log.Info("Server starting", map[string]any{"port": port})
 	if err := http.ListenAndServe(":"+port, r); err != nil {
-		log.Fatal("Server error", map[string]interface{}{"error": err})
+		log.Fatal("Server error", map[string]any{"error": err})
 	}
 }

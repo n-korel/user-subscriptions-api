@@ -7,9 +7,20 @@ import (
 	"go.uber.org/zap/zapcore"
 )
 
+type LoggerInterface interface {
+	Info(message string, fields map[string]any)
+	Error(message string, fields map[string]any)
+	Warn(message string, fields map[string]any)
+	Debug(message string, fields map[string]any)
+	Fatal(message string, fields map[string]any)
+	Sync() error
+}
+
 type Logger struct {
 	*zap.Logger
 }
+
+var _ LoggerInterface = (*Logger)(nil)
 
 func New(level string) (*Logger, error) {
 	var zapLevel zapcore.Level
@@ -57,42 +68,42 @@ func New(level string) (*Logger, error) {
 	return &Logger{zapLogger}, nil
 }
 
-func (l *Logger) Info(message string, fields map[string]interface{}) {
+func (l *Logger) Info(message string, fields map[string]any) {
 	if fields == nil {
-		fields = make(map[string]interface{})
+		fields = make(map[string]any)
 	}
 	l.Logger.Info(message, l.mapToFields(fields)...)
 }
 
-func (l *Logger) Error(message string, fields map[string]interface{}) {
+func (l *Logger) Error(message string, fields map[string]any) {
 	if fields == nil {
-		fields = make(map[string]interface{})
+		fields = make(map[string]any)
 	}
 	l.Logger.Error(message, l.mapToFields(fields)...)
 }
 
-func (l *Logger) Warn(message string, fields map[string]interface{}) {
+func (l *Logger) Warn(message string, fields map[string]any) {
 	if fields == nil {
-		fields = make(map[string]interface{})
+		fields = make(map[string]any)
 	}
 	l.Logger.Warn(message, l.mapToFields(fields)...)
 }
 
-func (l *Logger) Debug(message string, fields map[string]interface{}) {
+func (l *Logger) Debug(message string, fields map[string]any) {
 	if fields == nil {
-		fields = make(map[string]interface{})
+		fields = make(map[string]any)
 	}
 	l.Logger.Debug(message, l.mapToFields(fields)...)
 }
 
-func (l *Logger) Fatal(message string, fields map[string]interface{}) {
+func (l *Logger) Fatal(message string, fields map[string]any) {
 	if fields == nil {
-		fields = make(map[string]interface{})
+		fields = make(map[string]any)
 	}
 	l.Logger.Fatal(message, l.mapToFields(fields)...)
 }
 
-func (l *Logger) mapToFields(m map[string]interface{}) []zap.Field {
+func (l *Logger) mapToFields(m map[string]any) []zap.Field {
 	fields := make([]zap.Field, 0, len(m))
 	for k, v := range m {
 		fields = append(fields, zap.Any(k, v))
