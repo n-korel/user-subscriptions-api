@@ -133,7 +133,6 @@ func (r *repository) GetCostByPeriod(ctx context.Context, startDate, endDate str
 	if serviceName != nil {
 		query += fmt.Sprintf(" AND service_name = $%d", argCount)
 		args = append(args, *serviceName)
-		argCount++
 	}
 
 	var totalCost, count int

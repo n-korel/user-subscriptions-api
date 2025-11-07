@@ -91,7 +91,10 @@ func TestGetSubscriptions_Success(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response Response
-	json.NewDecoder(w.Body).Decode(&response)
+	if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
+    	t.Fatalf("failed to decode response: %v", err)
+	}
+
 	assert.Equal(t, "success", response.Status)
 }
 
@@ -126,7 +129,10 @@ func TestHandlerCreateSubscription_Success(t *testing.T) {
 	assert.Equal(t, http.StatusCreated, w.Code)
 
 	var response Response
-	json.NewDecoder(w.Body).Decode(&response)
+	if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
+    	t.Fatalf("failed to decode response: %v", err)
+	}
+
 	assert.Equal(t, "success", response.Status)
 }
 
@@ -143,7 +149,10 @@ func TestCreateSubscription_InvalidJSON(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	var response Response
-	json.NewDecoder(w.Body).Decode(&response)
+	if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
+    	t.Fatalf("failed to decode response: %v", err)
+	}
+
 	assert.Equal(t, "error", response.Status)
 	assert.Contains(t, response.Error, "Invalid JSON")
 }
@@ -183,7 +192,10 @@ func TestHandlerUpdateSubscription_Success(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response Response
-	json.NewDecoder(w.Body).Decode(&response)
+	if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
+    	t.Fatalf("failed to decode response: %v", err)
+	}
+
 	assert.Equal(t, "success", response.Status)
 }
 
@@ -204,7 +216,10 @@ func TestHandlerUpdateSubscription_InvalidID(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	var response Response
-	json.NewDecoder(w.Body).Decode(&response)
+	if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
+    	t.Fatalf("failed to decode response: %v", err)
+	}
+
 	assert.Equal(t, "error", response.Status)
 	assert.Contains(t, response.Error, "Invalid subscription ID")
 }
@@ -230,7 +245,10 @@ func TestHandlerDeleteSubscription_Success(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response Response
-	json.NewDecoder(w.Body).Decode(&response)
+	if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
+    	t.Fatalf("failed to decode response: %v", err)
+	}
+
 	assert.Equal(t, "success", response.Status)
 }
 
@@ -254,7 +272,10 @@ func TestHandlerGetCostByPeriod_Success(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 
 	var response Response
-	json.NewDecoder(w.Body).Decode(&response)
+	if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
+    	t.Fatalf("failed to decode response: %v", err)
+	}
+
 	assert.Equal(t, "success", response.Status)
 }
 
@@ -271,7 +292,10 @@ func TestGetCostByPeriod_InvalidUserID(t *testing.T) {
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 
 	var response Response
-	json.NewDecoder(w.Body).Decode(&response)
+	if err := json.NewDecoder(w.Body).Decode(&response); err != nil {
+    	t.Fatalf("failed to decode response: %v", err)
+	}
+
 	assert.Equal(t, "error", response.Status)
 	assert.Contains(t, response.Error, "Invalid user ID format")
 }

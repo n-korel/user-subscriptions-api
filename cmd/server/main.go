@@ -56,7 +56,11 @@ func main() {
 		fmt.Printf("Failed to initialize logger: %v\n", err)
 		os.Exit(1)
 	}
-	defer log.Sync()
+	
+	defer func() {
+    _ = log.Sync()
+	}()
+
 
 	db, err := pgxpool.New(context.Background(), dsn)
 	if err != nil {

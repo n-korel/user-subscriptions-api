@@ -76,7 +76,9 @@ func TestRepository_GetAll(t *testing.T) {
 		UserID:      uuid.New(),
 		StartDate:   "01-2025",
 	}
-	repo.Create(context.Background(), req)
+	if _, err := repo.Create(context.Background(), req); err != nil {
+		t.Fatalf("failed to create subscription: %v", err)
+	}
 
 	subs, err := repo.GetAll(context.Background())
 
@@ -180,20 +182,24 @@ func TestRepository_GetCostByPeriod(t *testing.T) {
 	repo := NewRepository(db, mockLog)
 
 	userID := uuid.New()
-	
-	repo.Create(context.Background(), CreateSubscriptionRequest{
+
+	if _, err := repo.Create(context.Background(), CreateSubscriptionRequest{
 		ServiceName: "Netflix",
 		Price:       100,
 		UserID:      userID,
 		StartDate:   "01-2025",
-	})
-	
-	repo.Create(context.Background(), CreateSubscriptionRequest{
+	}); err != nil {
+		t.Fatalf("failed to create subscription: %v", err)
+	}
+
+	if _, err := repo.Create(context.Background(), CreateSubscriptionRequest{
 		ServiceName: "Spotify",
 		Price:       50,
 		UserID:      userID,
 		StartDate:   "01-2025",
-	})
+	}); err != nil {
+		t.Fatalf("failed to create subscription: %v", err)
+	}
 
 	totalCost, count, err := repo.GetCostByPeriod(context.Background(), "01-2025", "12-2025", &userID, nil)
 

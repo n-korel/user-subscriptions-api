@@ -45,19 +45,14 @@ func (s *service) CreateSubscription(ctx context.Context, req CreateSubscription
 }
 
 func (s *service) UpdateSubscription(ctx context.Context, id int, req UpdateSubscriptionRequest) (*Subscription, error) {
-	if err := s.validateSubscriptionRequest(CreateSubscriptionRequest{
-		ServiceName: req.ServiceName,
-		Price:       req.Price,
-		UserID:      req.UserID,
-		StartDate:   req.StartDate,
-		EndDate:     req.EndDate,
-	}); err != nil {
+	if err := s.validateSubscriptionRequest(CreateSubscriptionRequest(req)); err != nil {
 		s.log.Warn("Validation failed", map[string]any{"error": err.Error(), "id": id})
 		return nil, err
 	}
 
 	return s.repo.Update(ctx, id, req)
 }
+
 
 func (s *service) DeleteSubscription(ctx context.Context, id int) error {
 	return s.repo.Delete(ctx, id)
